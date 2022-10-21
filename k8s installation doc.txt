@@ -1,0 +1,99 @@
+
+Use below link to install minikube on power:
+
+https://www.power-devops.com/post/minikube-local-kubernetes-development-on-ibm-power
+
+
+
+# curl -L -o /usr/local/bin/minikube https://dl.power-devops.com/minikube-linux-ppc64le.v1.5.2
+# chmod 0755 /usr/local/bin/minikube
+
+# docker pull powerlinux/storage-provisioner-ppc64le:v1.8.1
+# docker tag powerlinux/storage-provisioner-ppc64le:v1.8.1 gcr.io/k8s-minikube/storage-provisioner-ppc64le:v1.8.1
+
+# minikube config set vm-driver none
+
+# minikube start
+
+If in case u get errors, 
+
+# systemctl status kubelet
+# vim /lib/systemd/system/kubelet.service
+# apt-get update
+# apt-get install kubeadm=1.25.3-00
+
+if not working, reset kubeadm and install mentioned versions 
+
+# kubeadm reset
+# minikube start --vm-driver=none
+# kubeadm init --pod-network-cidr=10.244.0.0/16
+# apt-get uninstall kubeadm kubelet kubectl
+# apt-get install kubeadm=1.20.0-00 kubelet=1.20.0-00 kubectl=1.20.0-00
+
+
+# kubeadm init --pod-network-cidr=10.244.0.0/16
+
+You have to run below command as root user
+
+#export KUBECONFIG=/etc/kubernetes/admin.conf
+
+
+if still not working, restart kubelet
+
+# systemctl daemon-reload
+# systemctl restart kubelet
+# systemctl status kubelet
+
+
+Check if its working now
+
+# kubectl get pods -A
+
+use this if nodes are not running
+
+# kubectl taint node --all node-role.kubernetes.io/master-
+
+
+
+
+
+*********************************************************
+---------------------------------------------------------
+
+in case if nothing working, try with this as it gets 
+
+
+
+# mkdir -p $HOME/.kube
+# sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+systemctl status kubelet
+kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+kubectl get nodes
+systemctl status kubelet
+mkdir -p /etc/cni/net.d
+
+
+visit this site https://github.com/containernetworking/cni and make chages to mynet and loopback
+
+vim /etc/cni/net.d/10-mynet.conf
+vim /etc/cni/net.d/99-loopback.conf
+go version
+
+export GOPATH=`pwd`
+mkdir -p $GOPATH/src/github.com/containernetworking/plugins
+git clone https://github.com/containernetworking/cni.git  $GOPATH/src/github.com/containernetworking/plugins
+cd  $GOPATH/src/github.com/containernetworking/plugins
+git checkout v1.0.0
+ls pluginsls scripts
+cd ..
+rm -rf plugins
+git clone https://github.com/containernetworking/plugins.git
+cd plugins
+git checkout v1.0.0
+
+./build_linux.sh
+cp bin/* /opt/cni/bin/
+
+
+*********************************************************
+---------------------------------------------------------
